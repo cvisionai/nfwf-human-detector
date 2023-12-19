@@ -4,18 +4,37 @@
   console.log('Sanity Check!');
 })();
 
-function handleClick(type) {
-  fetch('/tasks', {
+function handleClick() {
+  fetch('/slice_video', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ type: type }),
+    body: JSON.stringify({ url : fileList.value,
+                           start_frame : 35,
+                           end_frame : 250}),
   })
   .then(response => response.json())
   .then(data => {
     getStatus(data.task_id)
   })
+}
+
+function handleDetectClick() {
+    fetch('/run_yolo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url : fileList.value,
+                               confidence : 0.25})
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data); // Print the JSON response for debugging
+        getStatus(data.task_id);
+    })
+    .catch(error => console.error(error)); // Handle any errors during the fetch request
 }
 
 function getStatus(taskID) {
@@ -45,3 +64,60 @@ function getStatus(taskID) {
   })
   .catch(err => console.log(err));
 }
+
+const fileNames = ['file1.txt', 'file2.txt', 'file3.txt'];
+
+const fileList = document.getElementById('file-list');
+
+fetch('/video_files')
+  .then(response => response.json())
+  .then(data => {
+    data.forEach(fileName => {
+      const option = document.createElement('option');
+      option.value = fileName;
+      option.text = fileName;
+      fileList.add(option);
+    });
+  })
+  .catch(error => console.error(error));
+
+function selectFile() {
+  const selectedFile = fileList.value;
+  if (selectedFile) {
+    console.log(`You selected ${selectedFile}`);
+  }
+}
+
+const resultFileList = document.getElementById('results-file-list');
+
+fetch('/result_files')
+  .then(response => response.json())
+  .then(data => {
+    data.forEach(fileName => {
+      const listItem = document.createElement('li');
+      listItem.textContent = fileName;
+      listItem.addEventListener('click', () => selectFile(fileName));
+      resultFileList.appendChild(listItem);
+    });
+  })
+  .catch(error => console.error(error));
+
+/*
+function selectFile(selectedFile) {
+  console.log(`You selected ${selectedFile}`);
+}
+
+fileNames.forEach(fileName => {
+  const option = document.createElement('option');
+  option.value = fileName;
+  option.text = fileName;
+  fileList.add(option);
+});
+
+function selectFile() {
+  const selectedFile = fileList.value;
+  if (selectedFile) {
+    console.log(`You selected ${selectedFile}`);
+  }
+}
+*/

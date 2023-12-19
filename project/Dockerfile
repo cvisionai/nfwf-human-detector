@@ -1,6 +1,6 @@
 # pull official base image
 FROM python:3.9.5-slim-buster
-
+RUN apt-get update && apt-get install --no-install-recommends -y ffmpeg && rm -fr /var/lib/apt/lists/*
 # set work directory
 WORKDIR /usr/src/app
 

@@ -1,17 +1,85 @@
 {% extends "_base.html" %}
 
 {% block content %}
+<style>
+.banner {
+    width: 100%;
+    height: auto;
+}
 
+.file-selector {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+  max-width: 400px;
+}
+
+.file-selector h3 {
+  margin-top: 0;
+}
+
+.file-selector select {
+  width: 100%;
+  height: 30px;
+  margin-top: 10px;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: #fff;
+}
+
+.file-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.file-list ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.file-list li {
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.file-list li:hover {
+  background-color: #f5f5f5;
+}
+
+.file-list li:last-child {
+  border-bottom: none;
+}
+
+.table {
+    height: 120px; /* Set a fixed height */
+    overflow-y: scroll; /* Create a vertical scrollbar */
+  }
+
+</style>
 <div class="starter-template">
-  <h1>FastAPI + Celery + Docker</h1>
+  <h1>Activity Detection and Slicing App</h1>
   <hr><br>
+  <img class="banner" src="{{url_for('static', path='/banner.png')}}" alt="Banner Image">
+  <div class="file-selector">
+    <h3>Select a File:</h3>
+    <select id="file-list" onchange="selectFile()">
+      <option value="">--Select a File--</option>
+    </select>
+  </div>
   <div>
     <h3>Tasks</h3>
     <p>Pick a task length.</p>
     <div class="btn-group" role="group" aria-label="Basic example">
-      <button type="button" class="btn btn-primary" onclick="handleClick(1)">Short</a>
-      <button type="button" class="btn btn-primary" onclick="handleClick(2)">Medium</a>
-      <button type="button" class="btn btn-primary" onclick="handleClick(3)">Long</a>
+      <button type="button" class="btn btn-primary" onclick="handleClick(1)">Slice Video</a>
+    </div>
+    <div class="btn-group" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-primary" onclick="handleDetectClick(1)">Detect Video</a>
     </div>
   </div>
   <br><br>
@@ -29,6 +97,12 @@
       <tbody id="tasks">
       </tbody>
     </table>
+  </div>
+  <div class="file-selector">
+    <h3>Select a File:</h3>
+    <div class="file-list">
+      <ul id="results-file-list"></ul>
+    </div>
   </div>
 </div>
 
