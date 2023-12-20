@@ -1,0 +1,2 @@
+// This file is used to keep the 'logs' directory tracked by Celery.
+// The 'logs' directory is where Celery logs are stored for debugging purposes.
