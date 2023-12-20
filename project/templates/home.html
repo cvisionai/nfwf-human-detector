@@ -8,16 +8,28 @@
 }
 
 .file-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
   font-family: Arial, sans-serif;
   font-size: 14px;
+  max-width: 400px;
   border: 1px solid #ccc;
   padding: 10px;
-  margin: 10px;
-  max-width: 400px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
+
+/*
+
+  margin: 10px;
+*/
 
 .file-selector h3 {
   margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
 }
 
 .file-selector select {
@@ -48,10 +60,6 @@
   cursor: pointer;
 }
 
-.file-list li:hover {
-  background-color: #f5f5f5;
-}
-
 .file-list li:last-child {
   border-bottom: none;
 }
@@ -61,20 +69,50 @@
     overflow-y: scroll; /* Create a vertical scrollbar */
   }
 
+.table-row {
+  transition: all 0.3s ease; /* Animation */
+}
+
+.table tbody tr {
+  color: #aca3cc; /* Lighter text color for contrast */
+}
+
+.file-list li:hover {
+  background-color: #333; /* Darker hover color */
+}
+
+.table tbody tr:nth-child(odd) {
+  background-color: #2a2a2a; /* Dark color for odd rows */
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #333; /* Even darker color for even rows */
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chart-container {
+  margin-bottom: 50px;
+}
+
 </style>
 <div class="starter-template">
   <h1>Activity Detection and Slicing App</h1>
   <hr><br>
   <img class="banner" src="{{url_for('static', path='/banner.png')}}" alt="Banner Image">
   <div class="file-selector">
-    <h3>Select a File:</h3>
+    <h3>Select a Video File:</h3>
     <select id="file-list" onchange="selectFile()">
       <option value="">--Select a File--</option>
     </select>
   </div>
   <div>
     <h3>Tasks</h3>
-    <p>Pick a task length.</p>
+    <p>Choose a task to run</p>
     <div class="btn-group" role="group" aria-label="Basic example">
       <button type="button" class="btn btn-primary" onclick="handleClick(1)">Slice Video</a>
     </div>
@@ -98,11 +136,19 @@
       </tbody>
     </table>
   </div>
-  <div class="file-selector">
-    <h3>Select a File:</h3>
-    <div class="file-list">
-      <ul id="results-file-list"></ul>
+  <div class="controls">
+    <div class="file-selector">
+      <h4>Select a Results File:</h4>
+      <select id="results-file-list" onchange="selectResultsFile()">
+        <option value="">--Select a File--</option>
+      </select>
     </div>
+    <div class="btn-group" role="group" aria-label="Basic example">
+      <button type="button" class="btn btn-primary" onclick="handlePlotClick(1)">Plot Results</a>
+    </div>
+  </div>
+  <div class="chart-container">
+    <canvas id="myChart"></canvas>
   </div>
 </div>
 

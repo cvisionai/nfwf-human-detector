@@ -37,6 +37,47 @@ function handleDetectClick() {
     .catch(error => console.error(error)); // Handle any errors during the fetch request
 }
 
+let myNewChart = null;
+
+function handlePlotClick() {
+  const subdir = document.getElementById('results-file-list').value;  // Get the selected subdir
+  fetch(`/result_contents?subdir=${encodeURIComponent(subdir)}/labels`) // fetch('/result_contents?subdir=artifacts12/labels')
+  .then(response => response.json())
+  .then(files => {
+    // console.log(files);
+    // Extract data
+    const data = files.map(file => {
+      // console.log(file)
+      const x = parseInt(file.name.split('_')[file.name.split('_').length - 1]);
+      const y = parseFloat(file.content.split(' ').pop());
+      return { x, y };
+    });
+    
+    console.log(myNewChart)
+    if (myNewChart) {
+      myNewChart.destroy();
+    }
+    // Create chart
+    const ctx = document.getElementById('myChart').getContext('2d');
+    myNewChart = new Chart(ctx, {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          data,
+          backgroundColor: 'rgba(0, 123, 255, 0.5)',
+          borderColor: 'rgba(0, 123, 255, 1)',
+        }],
+      },
+      options: {
+        scales: {
+          x: { beginAtZero: true },
+          y: { beginAtZero: true },
+        },
+      },
+    });  
+  })
+  .catch(error => console.error(error));
+}
 function getStatus(taskID) {
   fetch(`/tasks/${taskID}`, {
     method: 'GET',
@@ -51,11 +92,20 @@ function getStatus(taskID) {
       <tr>
         <td>${taskID}</td>
         <td>${res.task_status}</td>
-        <td>${res.task_result}</td>
+        <td>${res.task_status === 'SUCCESS' ? res.task_result : res.task_result.status}</td>
       </tr>`;
-    const newRow = document.getElementById('tasks').insertRow(0);
-    newRow.innerHTML = html;
 
+    const table = document.getElementById('tasks');
+    console.log("Table length = " + table.rows.length);
+    // If the table has 5 or more rows, remove the last one
+    if (table.rows.length >= 5) {
+      table.deleteRow(-1);
+    }
+    // Insert the new row at the top of the table
+    const newRow = table.insertRow(0);
+    newRow.classList.add('table-row');
+    newRow.innerHTML = html;
+  
     const taskStatus = res.task_status;
     if (taskStatus === 'SUCCESS' || taskStatus === 'FAILURE') return false;
     setTimeout(function() {
@@ -72,10 +122,12 @@ const fileList = document.getElementById('file-list');
 fetch('/video_files')
   .then(response => response.json())
   .then(data => {
+    // console.log(data);
     data.forEach(fileName => {
       const option = document.createElement('option');
       option.value = fileName;
       option.text = fileName;
+      // console.log(option);
       fileList.add(option);
     });
   })
@@ -93,15 +145,24 @@ const resultFileList = document.getElementById('results-file-list');
 fetch('/result_files')
   .then(response => response.json())
   .then(data => {
+    // console.log(data);
     data.forEach(fileName => {
-      const listItem = document.createElement('li');
-      listItem.textContent = fileName;
-      listItem.addEventListener('click', () => selectFile(fileName));
-      resultFileList.appendChild(listItem);
+      // console.log(fileName);
+      const result_option = document.createElement('option');
+      result_option.value = fileName;
+      result_option.text = fileName;
+      // console.log(result_option)
+      resultFileList.add(result_option);
     });
   })
   .catch(error => console.error(error));
 
+  function selectResultsFile() {
+    const selectedFile = resultFileList.value;
+    if (selectedFile) {
+      console.log(`You selected ${selectedFile}`);
+    }
+  }
 /*
 function selectFile(selectedFile) {
   console.log(`You selected ${selectedFile}`);

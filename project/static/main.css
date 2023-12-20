@@ -7,6 +7,12 @@ html {
 body {
   padding-top: 2rem;
   margin-bottom: 60px;
+  background: linear-gradient(to bottom right, #4b0082, #800080);
+  /*background: url('seamless.webp') repeat;*/
+  color: #f0f0f0; /* Light text color for contrast */
+  font-family: 'Roboto', sans-serif; /* Modern, clean font */
+  margin: 0;
+  padding: 0;
 }
 .footer {
   position: absolute;
