@@ -22,6 +22,12 @@ services:
       context: ./project
       dockerfile: yolo_worker.Dockerfile
     command: celery worker --app=worker.celery --loglevel=info --logfile=logs/celery.log
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+              device_ids: ['0']
     volumes:
       - ./project:/usr/src/app
       - ./outputs:/outputs

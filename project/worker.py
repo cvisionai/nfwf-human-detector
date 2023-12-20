@@ -3,6 +3,7 @@ import time
 import requests
 import subprocess
 from celery import Celery
+from celery import current_task
 
 
 celery = Celery(__name__)
@@ -39,8 +40,8 @@ def slice_video(fileName, start_frame, end_frame, output_filename):
     # Return the output filename so the API can include it in the response
     return output_filename
 
-@celery.task(name="run_yolo")
-def run_yolo(video_path, confidence=0.25):
+@celery.task(bind=True, name="run_yolo")
+def run_yolo(self, video_path, confidence=0.25):
 
     video_path = os.path.join('/inputs',video_path)
     print("Got here?")
@@ -56,10 +57,12 @@ def run_yolo(video_path, confidence=0.25):
             "/work/yolov5/detect.py",
             "--weights", str(weights_path),
             "--source", str(video_path),
-            "--name", '/artifacts',
+            "--project", "/outputs",
+            "--name", 'artifacts',
             "--save-txt", # Save text output (localizations)
             "--save-conf", #With confidences
-            "--nosave" # Don't save images/video
+            "--nosave", # Don't save images/video
+            "--device", "0"
         ]
  
     #if type(data_path) != list:
@@ -90,9 +93,16 @@ def run_yolo(video_path, confidence=0.25):
     print(f"CMD={cmd}")
     
     try:
+        self.update_state(state='PROGRESS', meta={'status': 'Running YOLO'})
         subprocess.run(cmd, 
                     cwd='/work/yolov5')
     except subprocess.CalledProcessError as e:
+        self.update_state(state='FAILURE', 
+            meta={'status': 'Failed',
+            'exc_type': type(e).__name__,
+            'exc_message': e.format_exc().split('\n'),
+            'custom': '...'
+            })
         return False
     
     return "Completed"

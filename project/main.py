@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from typing import Optional
 import os
 #import uuid
 
@@ -32,8 +33,24 @@ async def list_video_files(request: Request):
     return JSONResponse(files)
 
 @app.get("/result_files")
-async def list_video_files(request: Request):
-    files = os.listdir('/outputs')
+async def list_video_files(request: Request, subdir: Optional[str] = None):
+    directory = '/outputs'
+    if subdir:
+        directory = os.path.join(directory, subdir)
+    files = os.listdir(directory)
+    return JSONResponse(files)
+
+@app.get("/result_contents")
+async def get_result_contents(request: Request, subdir: Optional[str] = None):
+    directory = '/outputs'
+    if subdir:
+        directory = os.path.join(directory, subdir)
+    filenames = os.listdir(directory)
+    files = []
+    for filename in filenames:
+        with open(os.path.join(directory, filename), 'r') as f:
+            contents = f.read()
+            files.append({'name': filename, 'content': contents})
     return JSONResponse(files)
 
 @app.post('/slice_video')
