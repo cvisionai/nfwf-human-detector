@@ -34,7 +34,7 @@ async def list_video_files(request: Request):
 
 @app.get("/result_files")
 async def list_video_files(request: Request, subdir: Optional[str] = None):
-    directory = '/outputs'
+    directory = '/outputs/results'
     if subdir:
         directory = os.path.join(directory, subdir)
     files = os.listdir(directory)
