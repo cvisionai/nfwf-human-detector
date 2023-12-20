@@ -58,7 +58,7 @@ def run_yolo(self, video_path, confidence=0.25):
             "/work/yolov5/detect.py",
             "--weights", str(weights_path),
             "--source", str(video_path),
-            "--project", "/outputs/results",
+            "--project", "/outputs",
             "--name", 'artifacts',
             "--save-txt", # Save text output (localizations)
             "--save-conf", # With confidences
