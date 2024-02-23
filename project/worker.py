@@ -46,62 +46,72 @@ def slice_video(self, fileName, start_frame, end_frame, output_filename):
 def run_yolo(self, video_path, confidence=0.25):
 
     video_path = os.path.join('/inputs',video_path)
-    weights_path = 'yolov5l6.pt'
-    strategy = {
-        'image_size': 1280,
-        'classes': [0],
-        'vid_stride': 5,
-        'conf_thres': confidence,
-        }
-    
-    cmd=["python3",
-            "/work/yolov5/detect.py",
-            "--weights", str(weights_path),
-            "--source", str(video_path),
-            "--project", "/outputs",
-            "--name", 'artifacts',
-            "--save-txt", # Save text output (localizations)
-            "--save-conf", # With confidences
-            "--nosave", # Don't save images/video
-            "--device", "0"
-        ]
- 
-    image_size = strategy.get('image_size',None)
-    if type(image_size) == list:
-        for sz in image_size:
-            cmd.extend(["--imgsz", str(sz)])
-    elif image_size:
-        cmd.extend(["--imgsz", str(image_size)])
 
-    conf_thresh = strategy.get('conf_thres',None)
-    if conf_thresh is not None:
-        cmd.extend(["--conf-thres", str(conf_thresh)])
-    
-    classes = strategy.get('classes', None)
-    if type(classes) == list:
-        cmd.extend(["--classes"])
-        for elem in classes:
-            cmd.extend([str(elem)])
-    elif classes is not None:
-        cmd.extend(['--classes', str(classes)])
+    # Check if the video path is a folder or file
+    if os.path.isdir(video_path):
+        # Create list of video files in the path
+        video_files = [os.path.join(video_path,f) for f in os.listdir(video_path) if os.path.isfile(os.path.join(video_path, f))]
+    else:
+        video_files = [video_path]
 
-    vid_stride = strategy.get('vid_stride', None)
-    if vid_stride is not None:
-        cmd.extend(['--vid-stride', str(vid_stride)])
-
-    print(f"CMD={cmd}")
+    for video_file in video_files:
+        
+        weights_path = 'yolov5l6.pt'
+        strategy = {
+            'image_size': 1280,
+            'classes': [0],
+            'vid_stride': 5,
+            'conf_thres': confidence,
+            }
+        
+        cmd=["python3",
+                "/work/yolov5/detect.py",
+                "--weights", str(weights_path),
+                "--source", str(video_file),
+                "--project", "/outputs",
+                "--name", os.path.splitext(video_file.split('/')[-1])[0],
+                "--save-txt", # Save text output (localizations)
+                "--save-conf", # With confidences
+                "--nosave", # Don't save images/video
+                "--device", "0"
+            ]
     
-    try:
-        self.update_state(state='PROGRESS', meta={'status': 'Running YOLO'})
-        subprocess.run(cmd, 
-                    cwd='/work/yolov5')
-    except subprocess.CalledProcessError as e:
-        self.update_state(state='FAILURE', 
-            meta={'status': 'Failed',
-            'exc_type': type(e).__name__,
-            'exc_message': e.output.decode('utf-8').split('\n'),
-            'custom': '...'
-            })
-        return False
+        image_size = strategy.get('image_size',None)
+        if type(image_size) == list:
+            for sz in image_size:
+                cmd.extend(["--imgsz", str(sz)])
+        elif image_size:
+            cmd.extend(["--imgsz", str(image_size)])
+
+        conf_thresh = strategy.get('conf_thres',None)
+        if conf_thresh is not None:
+            cmd.extend(["--conf-thres", str(conf_thresh)])
+        
+        classes = strategy.get('classes', None)
+        if type(classes) == list:
+            cmd.extend(["--classes"])
+            for elem in classes:
+                cmd.extend([str(elem)])
+        elif classes is not None:
+            cmd.extend(['--classes', str(classes)])
+
+        vid_stride = strategy.get('vid_stride', None)
+        if vid_stride is not None:
+            cmd.extend(['--vid-stride', str(vid_stride)])
+
+        print(f"CMD={cmd}")
+    
+        try:
+            self.update_state(state='PROGRESS', meta={'status': 'Running YOLO'})
+            subprocess.run(cmd, 
+                        cwd='/work/yolov5')
+        except subprocess.CalledProcessError as e:
+            self.update_state(state='FAILURE', 
+                meta={'status': 'Failed',
+                'exc_type': type(e).__name__,
+                'exc_message': e.output.decode('utf-8').split('\n'),
+                'custom': '...'
+                })
+            return False
     
     return "Completed"
