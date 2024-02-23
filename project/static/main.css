@@ -7,7 +7,9 @@ html {
 body {
   padding-top: 2rem;
   margin-bottom: 60px;
-  background: linear-gradient(to bottom right, #4b0082, #800080);
+  /*background: linear-gradient(to bottom right, #4b0082, #800080);*/
+  background: url('vessel.jpg') no-repeat center center fixed;
+  background-size: cover;
   /*background: url('seamless.webp') repeat;*/
   color: #f0f0f0; /* Light text color for contrast */
   font-family: 'Roboto', sans-serif; /* Modern, clean font */
@@ -20,4 +22,133 @@ body {
   width: 100%;
   height: 50px;
   line-height: 50px;
+}
+
+.banner {
+    width: 100%;
+    height: auto;
+}
+
+.button1{
+  display:inline-block;
+  padding:0.35em 1.2em;
+  border:0.1em solid #FFFFFF;
+  margin:0 0.3em 0.3em 0;
+  border-radius:0.12em;
+  box-sizing: border-box;
+  text-decoration:none;
+  font-family:'Roboto',sans-serif;
+  font-weight:300;
+  color:#FFFFFF;
+  text-align:center;
+  transition: all 0.2s;
+  background-color:#893da0;
+}
+.button1:hover{
+  color:#000000;
+  background-color:#FFFFFF;
+}
+@media all and (max-width:30em){
+ .button1{
+  display:block;
+  margin:0.4em auto;
+  }
+}
+
+.starter-template h1 {
+    text-align: center; /* Centers the text horizontally */
+    font-family: Arial, sans-serif; /* Example of setting a font */
+    color: #decfcf; /* Sets the text color */
+    margin-top: 20px; /* Adds space above the h1 */
+    margin-bottom: 20px; /* Adds space below the h1 */
+    /* Additional styling can be added here */
+  }
+
+.file-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  max-width: 400px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.file-selector h3 {
+  margin-top: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.file-selector select {
+  width: 100%;
+  height: 30px;
+  margin-top: 10px;
+  padding: 5px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background-color: #fff;
+}
+
+.file-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.file-list ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.file-list li {
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.file-list li:last-child {
+  border-bottom: none;
+}
+
+.table {
+    height: 120px; /* Set a fixed height */
+    overflow-y: scroll; /* Create a vertical scrollbar */
+  }
+
+.table-row {
+  transition: all 0.3s ease; /* Animation */
+}
+
+.table tbody tr {
+  color: #aca3cc; /* Lighter text color for contrast */
+}
+
+.file-list li:hover {
+  background-color: #333; /* Darker hover color */
+}
+
+.table tbody tr:nth-child(odd) {
+  background-color: #2a2a2a; /* Dark color for odd rows */
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #333; /* Even darker color for even rows */
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(26, 36, 226, 0.8);
+}
+
+.chart-container {
+  margin-bottom: 50px;
+  background: rgba(174, 178, 242, 0.9);
 }
