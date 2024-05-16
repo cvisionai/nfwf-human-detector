@@ -4,6 +4,7 @@ import requests
 import subprocess
 from celery import Celery
 from celery import current_task
+import csv
 
 
 celery = Celery(__name__)
@@ -113,5 +114,20 @@ def run_yolo(self, video_path, confidence=0.25):
                 'custom': '...'
                 })
             return False
+        
+        # Concatenate the list of text files into a single file in the output directory
+        with open(f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}/labels.csv', 'w', newline='') as outfile:
+            writer = csv.writer(outfile)
+            for fname in os.listdir(f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}/labels'):
+                if fname.endswith('.txt'):
+                    with open(f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}/labels/{fname}') as infile:
+                        lines = infile.readlines()
+                        max_line = max(lines, key=lambda line: float(line.split()[-1]))
+                        confidence = float(max_line.split()[-1])
+                        sample_num = int(fname.split('.')[0].split("_")[-1])
+                        writer.writerow([sample_num, confidence])
+                    # Once finished, delete the text file
+                    os.remove(f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}/labels/{fname}')
+
     
     return "Completed"

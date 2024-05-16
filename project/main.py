@@ -37,7 +37,7 @@ async def list_video_files(request: Request, subdir: Optional[str] = None):
     directory = '/outputs'
     if subdir:
         directory = os.path.join(directory, subdir)
-    files = os.listdir(directory)
+    files = [f for f in os.listdir(directory) if os.path.isdir(os.path.join(directory, f))]
     return JSONResponse(files)
 
 @app.get("/result_contents")
