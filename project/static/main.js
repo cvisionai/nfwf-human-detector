@@ -41,15 +41,15 @@ let myNewChart = null;
 
 function handlePlotClick() {
   const subdir = document.getElementById('results-file-list').value;  // Get the selected subdir
-  fetch(`/result_contents?subdir=${encodeURIComponent(subdir)}/labels`) // fetch('/result_contents?subdir=artifacts12/labels')
+  fetch(`/result_contents?subdir=${encodeURIComponent(subdir)}`) // fetch('/result_contents?subdir=artifacts12/labels')
   .then(response => response.json())
-  .then(files => {
-    // console.log(files);
+  .then(results => {
+    // console.log(results);
     // Extract data
-    const data = files.map(file => {
-      // console.log(file)
-      const x = parseInt(file.name.split('_')[file.name.split('_').length - 1]);
-      const y = parseFloat(file.content.split(' ').pop());
+    const data = results.map(result => {
+      // console.log(result)
+      const x = result.sample;
+      const y = result.score;
       return { x, y };
     });
     

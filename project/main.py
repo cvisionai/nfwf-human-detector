@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import Optional
 import os
+import csv
 #import uuid
 
 from worker import create_task, slice_video, run_yolo
@@ -45,13 +46,16 @@ async def get_result_contents(request: Request, subdir: Optional[str] = None):
     directory = '/outputs'
     if subdir:
         directory = os.path.join(directory, subdir)
-    filenames = os.listdir(directory)
-    files = []
-    for filename in filenames:
-        with open(os.path.join(directory, filename), 'r') as f:
-            contents = f.read()
-            files.append({'name': filename, 'content': contents})
-    return JSONResponse(files)
+    
+    results_file = os.path.join(directory, 'labels.csv')
+    data = []
+    
+    with open(results_file, 'r') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            if len(row) == 2:
+                data.append({'sample': row[0], 'score': row[1]})
+    return JSONResponse(data)
 
 @app.post('/slice_video')
 async def post_slice_video(video_request: VideoRequest):
