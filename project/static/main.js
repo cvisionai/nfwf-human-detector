@@ -115,8 +115,6 @@ function getStatus(taskID) {
   .catch(err => console.log(err));
 }
 
-const fileNames = ['file1.txt', 'file2.txt', 'file3.txt'];
-
 const fileList = document.getElementById('file-list');
 
 fetch('/video_files')
@@ -163,22 +161,3 @@ fetch('/result_files')
       console.log(`You selected ${selectedFile}`);
     }
   }
-/*
-function selectFile(selectedFile) {
-  console.log(`You selected ${selectedFile}`);
-}
-
-fileNames.forEach(fileName => {
-  const option = document.createElement('option');
-  option.value = fileName;
-  option.text = fileName;
-  fileList.add(option);
-});
-
-function selectFile() {
-  const selectedFile = fileList.value;
-  if (selectedFile) {
-    console.log(`You selected ${selectedFile}`);
-  }
-}
-*/
