@@ -14,9 +14,6 @@ ENV PYTHONUNBUFFERED 1
 COPY ./requirements.txt .
 RUN pip install -r requirements.txt
 
-# copy project
-COPY . .
-
 WORKDIR /work
 RUN git clone -b $YOLOV5_VERSION https://github.com/ultralytics/yolov5
 WORKDIR /work/yolov5
@@ -29,3 +26,5 @@ RUN pip3 install --no-cache-dir numpy==1.23.1 &&\
 
 # set work directory
 WORKDIR /usr/src/app
+# copy project
+COPY . .
