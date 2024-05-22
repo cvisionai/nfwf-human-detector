@@ -88,11 +88,12 @@ function getStatus(taskID) {
   .then(response => response.json())
   .then(res => {
     console.log(res)
+    const taskResult = res.task_result ? res.task_result.status : 'No result';
     const html = `
       <tr>
         <td>${taskID}</td>
         <td>${res.task_status}</td>
-        <td>${res.task_status === 'SUCCESS' ? res.task_result : res.task_result.status}</td>
+        <td>${res.task_status === 'SUCCESS' ? res.task_result : taskResult}</td>
       </tr>`;
 
     const table = document.getElementById('tasks');

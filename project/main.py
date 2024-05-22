@@ -98,6 +98,6 @@ def get_status(task_id):
     result = {
         "task_id": task_id,
         "task_status": task_result.status,
-        "task_result": task_result.result
+        "task_result": task_result.result if task_result.result else 'No result'
     }
     return JSONResponse(result)
