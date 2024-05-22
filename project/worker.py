@@ -5,8 +5,11 @@ import subprocess
 from celery import Celery
 from celery import current_task
 import csv
+import time
+import re
+import glob
 
-
+# Create the Celery application
 celery = Celery(__name__)
 celery.conf.broker_url = os.environ.get("CELERY_BROKER_URL", "redis://localhost:6379")
 celery.conf.result_backend = os.environ.get("CELERY_RESULT_BACKEND", "redis://localhost:6379")
@@ -23,8 +26,10 @@ def slice_video(self, fileName, start_frame, end_frame, output_filename):
     file_path = os.path.join('/inputs',fileName)
 
     ffprobe_cmd = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=r_frame_rate", "-of", "default=noprint_wrappers=1:nokey=1", file_path]
-    output = subprocess.check_output(ffprobe_cmd)
-    fps = float(eval(output))
+    #output = subprocess.check_output(ffprobe_cmd)
+    output = subprocess.check_output(ffprobe_cmd).decode('utf-8')
+    fps, duration = map(float, output.strip().split('\n'))
+    #fps = float(eval(output))
 
     start_time = start_frame / fps
     end_time = end_frame / fps
@@ -43,7 +48,7 @@ def slice_video(self, fileName, start_frame, end_frame, output_filename):
     # Return the output filename so the API can include it in the response
     return output_filename
 
-@celery.task(bind=True, name="run_yolo")
+@celery.task(bind=True, name="run_yolo", result_extended=True)
 def run_yolo(self, video_path, confidence=0.25):
 
     video_path = os.path.join('/inputs',video_path)
@@ -61,7 +66,7 @@ def run_yolo(self, video_path, confidence=0.25):
         strategy = {
             'image_size': 1280,
             'classes': [0],
-            'vid_stride': 5,
+            'vid_stride': 1,
             'conf_thres': confidence,
             }
         
@@ -96,16 +101,50 @@ def run_yolo(self, video_path, confidence=0.25):
         elif classes is not None:
             cmd.extend(['--classes', str(classes)])
 
-        vid_stride = strategy.get('vid_stride', None)
+        # Get the video duration and fps
+        ffprobe_cmd = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=r_frame_rate,duration", "-of", "default=noprint_wrappers=1:nokey=1", video_file]
+        output = subprocess.check_output(ffprobe_cmd).decode('utf-8')
+        output_lines = output.strip().split('\n')
+        fps = float(eval(output_lines[0]))
+        duration = float(output_lines[1])
+        #fps, duration = map(float, eval(output.strip().split('\n')))
+        num_samples = int(duration/strategy.get('vid_stride', 1))
+        # Set vid_stride based off desired sampling rate from strategy and video fps
+        vid_stride = int(strategy.get('vid_stride', 1) * fps)
+
+        #vid_stride = strategy.get('vid_stride', None)
         if vid_stride is not None:
             cmd.extend(['--vid-stride', str(vid_stride)])
 
         print(f"CMD={cmd}")
-    
+
+        self.update_state(state='PROGRESS', meta={'status': 'Starting YOLO'})
+
         try:
-            self.update_state(state='PROGRESS', meta={'status': 'Running YOLO'})
-            subprocess.run(cmd, 
-                        cwd='/work/yolov5')
+            process = subprocess.Popen(cmd, cwd='/work/yolov5')
+
+            while True:
+                # Check if the process has finished
+                if process.poll() is not None:
+                    break
+
+                directory = f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}/labels'
+                tmp_files = glob.glob(os.path.join(directory, '*.txt'))
+
+                numbers = [int(re.search(r'_(\d+)\.txt$', file).group(1)) for file in tmp_files if re.search(r'_(\d+)\.txt$', file)]
+
+                # Get the highest number
+                highest_number = max(numbers) if numbers else 0
+
+                # Calculate the percentage
+                percentage = highest_number / num_samples * 100
+
+                # Update the task state
+                self.update_state(state='PROGRESS', meta={'status': f'Video Duration: {duration:.1f}s, Num Samples: {num_samples}, Sample Rate: {strategy.get("vid_stride", 1)}s, Percent Complete: {percentage:.1f}%'})
+
+                # Wait a bit before checking again
+                time.sleep(1)
+
         except subprocess.CalledProcessError as e:
             self.update_state(state='FAILURE', 
                 meta={'status': 'Failed',
