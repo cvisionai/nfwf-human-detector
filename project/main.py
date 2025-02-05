@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from typing import Optional
 import os
 import csv
+import json
 #import uuid
 
 from worker import create_task, slice_video, run_yolo
@@ -55,6 +56,20 @@ async def get_result_contents(request: Request, subdir: Optional[str] = None):
         for row in reader:
             if len(row) == 2:
                 data.append({'sample': row[0], 'score': row[1]})
+    return JSONResponse(data)
+
+@app.get("/result_metadata")
+async def get_result_contents(request: Request, subdir: Optional[str] = None):
+    directory = '/outputs'
+    if subdir:
+        directory = os.path.join(directory, subdir)
+    
+    results_file = os.path.join(directory, 'metadata.json')
+    data = []
+    
+    # Metadata is json, read it in and send as a JSONResponse
+    with open(results_file, 'r') as f:
+        data = json.load(f)
     return JSONResponse(data)
 
 @app.post('/slice_video')

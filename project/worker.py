@@ -155,7 +155,11 @@ def run_yolo(self, video_path, confidence=0.25):
             return False
         
         # Concatenate the list of text files into a single file in the output directory
-        with open(f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}/labels.csv', 'w', newline='') as outfile:
+        results_dir = f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}'
+        # Write json file that has duration and number of samples
+        with open(os.path.join(results_dir,'metadata.json'), 'w') as outfile:
+            outfile.write(f'{{"duration": {duration}, "num_samples": {num_samples}, "sample_rate": {strategy.get("vid_stride", 1)}}}')
+        with open(os.path.join(results_dir,'labels.csv'), 'w', newline='') as outfile:
             writer = csv.writer(outfile)
             for fname in os.listdir(f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}/labels'):
                 if fname.endswith('.txt'):

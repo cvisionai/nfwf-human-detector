@@ -41,14 +41,22 @@ let myNewChart = null;
 
 function handlePlotClick() {
   const subdir = document.getElementById('results-file-list').value;  // Get the selected subdir
-  fetch(`/result_contents?subdir=${encodeURIComponent(subdir)}`) // fetch('/result_contents?subdir=artifacts12/labels')
-  .then(response => response.json())
-  .then(results => {
+  Promise.all([
+    fetch(`/result_contents?subdir=${encodeURIComponent(subdir)}`).then(response => response.json()),
+    fetch(`/result_metadata?subdir=${encodeURIComponent(subdir)}`).then(response => response.json())
+  ])
+  .then(([labels, metadata]) => {
+    // Extract metadata
+    const { duration, num_samples, sample_rate } = metadata;
+
+    // Convert duration to minutes
+    const durationMinutes = duration / 60;
+  
     // console.log(results);
     // Extract data
-    const data = results.map(result => {
+    const data =  labels.map(result => {
       // console.log(result)
-      const x = result.sample;
+      const x = result.sample / sample_rate / 60;
       const y = result.score;
       return { x, y };
     });
@@ -70,11 +78,26 @@ function handlePlotClick() {
       },
       options: {
         scales: {
-          x: { beginAtZero: true },
-          y: { beginAtZero: true },
+            x: {
+                beginAtZero: true,
+                max: durationMinutes, // Set x-axis limit to duration in minutes
+                title: {
+                    display: true,
+                    text: 'Time (minutes)'
+                }
+                },
+                y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Score'
+                }
+                },
         },
       },
-    });  
+    });
+    // Use metadata
+    console.log(`Duration: ${duration}, Num Samples: ${num_samples}, Sample Rate: ${sample_rate}`);  
   })
   .catch(error => console.error(error));
 }
