@@ -62,7 +62,7 @@ def run_yolo(self, video_path, confidence=0.25):
 
     for video_file in video_files:
         
-        weights_path = 'yolov5l6.pt'
+        weights_path = '/work/yolov5/yolov5l6.pt'
         strategy = {
             'image_size': 1280,
             'classes': [0],
@@ -170,7 +170,7 @@ def run_yolo(self, video_path, confidence=0.25):
                         sample_num = int(fname.split('.')[0].split("_")[-1])
                         writer.writerow([sample_num, confidence])
                     # Once finished, delete the text file
-                    os.remove(f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}/labels/{fname}')
+                    #os.remove(f'/outputs/{os.path.splitext(video_file.split("/")[-1])[0]}/labels/{fname}')
 
     
     return "Completed"
